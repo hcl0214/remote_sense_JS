@@ -41,11 +41,12 @@ def cut_check_domain(cut_input_df, point_index_tuple, size_int):
     return check_domain_df
 
 # 验证所取点是否为有效高值
-def validity_check(validity_input_df, point_index_tuple, size_int):
+def validity_check(validity_input_df, point_index_tuple, input_value, size_int):
     check_domain_df = cut_check_domain(validity_input_df, point_index_tuple, size_int)
     reshape_and_sort_df = reshape_and_sort(check_domain_df)
-    highest_point_on_check_domain = reshape_and_sort_df.index[0]
-    if highest_point_on_check_domain == point_index_tuple:
+    highest_point_on_check_domain = reshape_and_sort_df.values[0]
+    print(highest_point_on_check_domain,input_value)
+    if highest_point_on_check_domain == input_value:
         validity = 'DDF'
     else:
         validity = 'NEXT'
@@ -61,8 +62,8 @@ def find_the_highest_value(find_input_df, size_int, points_num):
     sorted_df = reshape_and_sort(find_input_df)
     for i in range(len(sorted_df)):
         max_tuple = sorted_df.index[i]
-        max_tuple = (int((max_tuple[0]-lat_min)*100), int((max_tuple[1]-lon_min)*100))
-        validity_result = validity_check(find_input_df, max_tuple, size_int)
+        max_tuple_index = (int((max_tuple[0]-lat_min)*100), int((max_tuple[1]-lon_min)*100))
+        validity_result = validity_check(find_input_df, max_tuple_index, sorted_df.values[i], size_int)
         if validity_result == 'DDF':
             point_information = {'value': sorted_df[max_tuple], 'lat': max_tuple[0], 'lon': max_tuple[1]}
             highest_points = [*highest_points, point_information]
