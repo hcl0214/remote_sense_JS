@@ -65,7 +65,7 @@ def find_the_highest_value(find_input_df, size_int, points_num):
         max_tuple_index = (int((max_tuple[0]-lat_min)*100), int((max_tuple[1]-lon_min)*100))
         validity_result = validity_check(find_input_df, max_tuple_index, sorted_df.values[i], size_int)
         if validity_result == 'DDF':
-            point_information = {'value': sorted_df[max_tuple], 'lat': max_tuple[0], 'lon': max_tuple[1]}
+            point_information = {'value': sorted_df[max_tuple], 'lon': max_tuple[0], 'lat': max_tuple[1]}
             highest_points = [*highest_points, point_information]
             highest_points_count = highest_points_count + 1
         if highest_points_count == points_num:
