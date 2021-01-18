@@ -1,9 +1,19 @@
 import pandas as pd
 import xlrd
 import numpy as np
+import sys
 
+#参数
 check_domain_size = 20  # 测试域大小，只要测试点值比周围2n+1*2n+1的点都大，则记为有效高值
 highest_points_number = 3  # 输出高值点个数
+
+#数据文件
+values_name = sys.argv[1]
+city_name = sys.argv[2]
+output_name = sys.argv[3]
+values_file = f'/data2/chuanglan/JS/heat/s5p/csv/{values_name}_av.csv'
+city_file = f'/data2/chuanglan/JS/heat/s5p/shapefile/mask/{city_name}.xlsx'
+output_file = f'/data2/chuanglan/JS/heat/s5p/csv/{output_name}_{values_name}.csv'
 
 #预处理：将格点数据叠加地图、经纬度，并删去全为0值的行列
 def precondition(value_df,area_df,lat_list,lon_list):
@@ -15,7 +25,7 @@ def precondition(value_df,area_df,lat_list,lon_list):
     city_value_df = city_value_df.replace(0,np.nan)
     city_value_df = city_value_df.dropna(axis=1,how='all')
     city_value_df = city_value_df.dropna(axis=0,how='all')
-    print(city_value_df)
+    #print(city_value_df)
     return city_value_df
 
 
@@ -65,7 +75,7 @@ def find_the_highest_value(find_input_df, size_int, points_num):
         max_tuple_index = (int((max_tuple[0]-lat_min)*100), int((max_tuple[1]-lon_min)*100))
         validity_result = validity_check(find_input_df, max_tuple_index, sorted_df.values[i], size_int)
         if validity_result == 'DDF':
-            point_information = {'value': sorted_df[max_tuple], 'lon': max_tuple[0], 'lat': max_tuple[1]}
+            point_information = {'name': f'{max_tuple[1]}N,{max_tuple[0]}E', 'latlng': [max_tuple[1],max_tuple[0]]}
             highest_points = [*highest_points, point_information]
             highest_points_count = highest_points_count + 1
         if highest_points_count == points_num:
@@ -78,8 +88,10 @@ def find_the_highest_value(find_input_df, size_int, points_num):
 if __name__ == '__main__':
     lat_list = np.linspace(30,36,600,endpoint=False)
     lon_list = np.linspace(116,122,600,endpoint=False)
-    value_df = pd.read_csv('no2_av.csv', header=None)
-    area_df = pd.read_excel('nanjing.xlsx',header=None)
+    value_df = pd.read_csv(values_file, header=None)
+    area_df = pd.read_excel(city_file,header=None)
     city_value_df = precondition(value_df,area_df,lat_list,lon_list)
     result = find_the_highest_value(city_value_df, check_domain_size, highest_points_number)
     print(result)
+    result = pd.DataFrame(result)
+    result.to_csv(output_file,index=False)
